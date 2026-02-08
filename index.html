@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Illustrations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --text: #1a1a1a;
+            --accent: #2a2a2a;
+            --border: #e0e0e0;
+            --hover: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        nav {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            color: var(--text);
+            text-decoration: none;
+            position: relative;
+            transition: opacity 0.3s ease;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--text);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover {
+            opacity: 0.6;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a.active::after {
+            width: 100%;
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 3rem;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 4/3;
+            background: #fff;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+        .gallery-item:nth-child(2) { animation-delay: 0.2s; }
+        .gallery-item:nth-child(3) { animation-delay: 0.3s; }
+        .gallery-item:nth-child(4) { animation-delay: 0.4s; }
+        .gallery-item:nth-child(5) { animation-delay: 0.5s; }
+        .gallery-item:nth-child(6) { animation-delay: 0.6s; }
+        .gallery-item:nth-child(7) { animation-delay: 0.7s; }
+        .gallery-item:nth-child(8) { animation-delay: 0.8s; }
+        .gallery-item:nth-child(9) { animation-delay: 0.9s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 1.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-item-overlay {
+            transform: translateY(0);
+        }
+
+        .gallery-item-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .about-section, .contact-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 0.2s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .about-section h1, .contact-section h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .about-section p, .contact-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            color: #444;
+        }
+
+        .contact-info {
+            margin-top: 3rem;
+        }
+
+        .contact-info a {
+            display: inline-block;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            margin-right: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--text);
+            transition: opacity 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            opacity: 0.6;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            nav {
+                gap: 1.5rem;
+            }
+
+            nav a {
+                font-size: 0.9rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .about-section h1, .contact-section h1 {
+                font-size: 2rem;
+            }
+
+            .about-section p, .contact-section p {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Smooth page transitions */
+        .section {
+            animation: fadeIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Tolis<br>Designs</div>
+        <nav>
+            <a href="#illustrations" class="nav-link active">Illustrations</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Illustrations Section -->
+        <section id="illustrations" class="section active">
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 1">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Editorial Illustration</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 2">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Character Design</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 3">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Concept Art</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 4">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Book Cover</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 5">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Magazine Feature</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 6">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Digital Portrait</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 7">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Brand Identity</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 8">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Abstract Series</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 9">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">Editorial Campaign</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section about-section">
+            <h1>About</h1>
+            <p>I'm an illustrator and visual artist based in [Your Location], creating compelling imagery for editorial, advertising, and cultural clients worldwide.</p>
+            <p>My work explores the intersection of contemporary issues and visual storytelling, combining traditional illustration techniques with modern digital approaches. I believe in the power of images to communicate complex ideas with clarity and impact.</p>
+            <p>Over the years, I've had the privilege of collaborating with leading publications, brands, and institutions to create illustrations that inform, inspire, and challenge perspectives.</p>
+            <p>When I'm not illustrating, you'll find me exploring museums, experimenting with new techniques, or teaching workshops on visual communication.</p>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section contact-section">
+            <h1>Contact</h1>
+            <p>I'm always interested in hearing about new projects and creative collaborations. Whether you have a specific brief or just want to discuss ideas, feel free to reach out.</p>
+            <div class="contact-info">
+                <a href="mailto:hello@example.com">hello@example.com</a>
+                <a href="https://instagram.com" target="_blank">Instagram</a>
+                <a href="https://twitter.com" target="_blank">Twitter</a>
+                <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Show corresponding section
+                const targetId = link.getAttribute('href').substring(1);
+                document.getElementById(targetId).classList.add('active');
+                
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
