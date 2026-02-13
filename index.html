@@ -357,15 +357,22 @@
             <h1>Contact</h1>
             <p>I'm always interested in hearing about new projects and creative collaborations. Whether you have a specific brief or just want to discuss ideas, feel free to reach out.</p>
             <div class="contact-info">
-                <a href="mailto:hello@example.com">hello@example.com</a>
-                <a href="https://instagram.com" target="_blank">Instagram</a>
-                <a href="https://twitter.com" target="_blank">Twitter</a>
-                <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+                <a href="#" id="email-link">Loading...</a>
             </div>
         </section>
     </main>
 
     <script>
+        // Obfuscated email - decoded on page load to prevent bot harvesting
+        (function() {
+            const user = 'hello';
+            const domain = 'example.com';
+            const email = user + '@' + domain;
+            const emailLink = document.getElementById('email-link');
+            emailLink.href = 'mailto:' + email;
+            emailLink.textContent = email;
+        })();
+
         // Navigation functionality
         const navLinks = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('.section');
