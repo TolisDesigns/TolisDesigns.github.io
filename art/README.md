@@ -1,11 +1,20 @@
-Drop PNG / JPG files here — the site will automatically show any images placed in this folder.
+# How to Add Images to Your Portfolio
 
-How it works
-- Filename (without extension) is used as the image title.
-- Supported file types: .png, .jpg, .jpeg
-- Just add or remove files in `/art` (via Git/GitHub) — no code changes required.
+## Steps to Upload
 
-Example
-- `sunrise-over-city.png` → displays as “Sunrise Over City”
+1. **Click "Add file"** — Look for the button in the top right corner of this folder
+2. **Select "Upload files"** — Choose this option from the dropdown
+3. **Drag and drop your images** — You can upload multiple PNG or JPG files at once
+4. **Click "Commit changes"** — The green button at the bottom. The commit message doesn't matter
+5. **Done!** — Your images will appear on your portfolio site within a few seconds
 
-If you want images to appear in a specific order, prefix filenames with numbers: `01-cover.jpg`, `02-portrait.png`.
+## File Tips
+
+- **Supported formats:** PNG and JPG/JPEG files
+- **Filenames become titles:** If you upload `my-painting.jpg`, it will display as "My Painting" on the site
+- **Order your work:** Use numbers at the start of filenames to control the order. For example:
+  - `01-featured-work.jpg`
+  - `02-landscape.png`
+  - `03-portrait.jpg`
+
+That's it! Just upload and commit, and your work will be live on the site.
