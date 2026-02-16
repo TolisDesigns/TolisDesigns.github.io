@@ -286,62 +286,10 @@
     <main>
         <!-- Illustrations Section -->
         <section id="illustrations" class="section active">
-            <div class="gallery">
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 1">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Editorial Illustration</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 2">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Character Design</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 3">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Concept Art</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 4">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Book Cover</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 5">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Magazine Feature</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 6">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Digital Portrait</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 7">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Brand Identity</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 8">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Abstract Series</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://example.com/example?w=800&h=600&fit=crop" alt="Illustration 9">
-                    <div class="gallery-item-overlay">
-                        <div class="gallery-item-title">Editorial Campaign</div>
-                    </div>
-                </div>
+            <div class="gallery" aria-live="polite">
+                <!-- Images from the `/art` folder will be injected here automatically -->
             </div>
+            <p id="gallery-empty" style="text-align:center; color:#666; margin-top:1rem; display:none;">No images yet — add PNG/JPG files to the <code>/art</code> folder.</p>
         </section>
 
         <!-- About Section -->
@@ -396,6 +344,120 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
+
+        // --- Gallery loader: auto-inject images placed in /art (PNG/JPG) ---
+        (function() {
+            const GITHUB_OWNER = 'TolisDesigns';
+            const GITHUB_REPO = 'TolisDesigns.github.io';
+            const GITHUB_BRANCH = 'main';
+            const GALLERY_PATH = 'art'; // folder in the repo
+
+            function prettifyFilename(name) {
+                return name
+                    .replace(/\.[^.]+$/, '')
+                    .replace(/[_-]+/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .replace(/\b\w/g, c => c.toUpperCase());
+            }
+
+            async function loadGallery() {
+                const gallery = document.querySelector('.gallery');
+                const emptyMsg = document.getElementById('gallery-empty');
+                gallery.innerHTML = '';
+                emptyMsg.style.display = 'none';
+
+                // Try a static manifest first (faster, no API rate limits)
+                try {
+                    const mres = await fetch('/art/manifest.json', { cache: 'no-cache' });
+                    if (mres.ok) {
+                        const list = await mres.json();
+                        if (Array.isArray(list) && list.length) {
+                            list.slice().sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                                .forEach((name, idx) => {
+                                    const title = prettifyFilename(name);
+                                    const item = document.createElement('div');
+                                    item.className = 'gallery-item';
+                                    item.style.animationDelay = `${(idx % 9) * 0.08 + 0.08}s`;
+
+                                    const img = document.createElement('img');
+                                    img.src = '/art/' + encodeURIComponent(name);
+                                    img.alt = title;
+                                    img.loading = 'lazy';
+
+                                    const overlay = document.createElement('div');
+                                    overlay.className = 'gallery-item-overlay';
+                                    const t = document.createElement('div');
+                                    t.className = 'gallery-item-title';
+                                    t.textContent = title;
+                                    overlay.appendChild(t);
+
+                                    item.appendChild(img);
+                                    item.appendChild(overlay);
+
+                                    item.addEventListener('click', () => window.open('/art/' + encodeURIComponent(name), '_blank'));
+                                    gallery.appendChild(item);
+                                });
+                            return; // done
+                        }
+                    }
+                } catch (err) {
+                    console.info('Manifest not available — falling back to GitHub API');
+                }
+
+                // Fallback to GitHub API listing (keeps backward compatibility)
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GALLERY_PATH}?ref=${GITHUB_BRANCH}`;
+                try {
+                    const res = await fetch(apiUrl);
+                    if (!res.ok) throw new Error('GitHub API returned ' + res.status);
+                    const items = await res.json();
+
+                    const images = items
+                        .filter(f => f.type === 'file' && /\.(jpe?g|png)$/i.test(f.name))
+                        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+                    if (!images.length) {
+                        emptyMsg.style.display = 'block';
+                        return;
+                    }
+
+                    images.forEach((file, idx) => {
+                        const title = prettifyFilename(file.name);
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        item.style.animationDelay = `${(idx % 9) * 0.08 + 0.08}s`;
+
+                        const img = document.createElement('img');
+                        img.src = file.download_url;
+                        img.alt = title;
+                        img.loading = 'lazy';
+
+                        const overlay = document.createElement('div');
+                        overlay.className = 'gallery-item-overlay';
+                        const t = document.createElement('div');
+                        t.className = 'gallery-item-title';
+                        t.textContent = title;
+                        overlay.appendChild(t);
+
+                        item.appendChild(img);
+                        item.appendChild(overlay);
+
+                        // open full image in new tab on click
+                        item.addEventListener('click', () => window.open(file.download_url, '_blank'));
+
+                        gallery.appendChild(item);
+                    });
+                } catch (err) {
+                    console.error('Gallery load error:', err);
+                    const emptyMsg = document.getElementById('gallery-empty');
+                    emptyMsg.style.display = 'block';
+                    emptyMsg.textContent = 'Could not load gallery (check repository visibility or network).';
+                }
+            }
+
+            // Load on DOM ready
+            document.addEventListener('DOMContentLoaded', loadGallery);
+        })();
     </script>
 </body>
 </html>
