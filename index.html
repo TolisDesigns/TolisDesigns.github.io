@@ -289,7 +289,7 @@
             <div class="gallery" aria-live="polite">
                 <!-- Images from the `/art` folder will be injected here automatically -->
             </div>
-            <p id="gallery-empty" style="text-align:center; color:#666; margin-top:1rem; display:none;">No images yet — add PNG/JPG files to the <code>/art</code> folder.</p>
+            <p id="gallery-empty" style="text-align:center; color:#666; margin-top:1rem; display:none;">No artwork to display at the moment.</p>
         </section>
 
         <!-- About Section -->
@@ -345,12 +345,12 @@
             });
         });
 
-        // --- Gallery loader: auto-inject images placed in /art (PNG/JPG) ---
+        // --- Gallery loader: auto-inject images placed in /art (PNG/JPG) via GitHub API ---
         (function() {
             const GITHUB_OWNER = 'TolisDesigns';
             const GITHUB_REPO = 'TolisDesigns.github.io';
             const GITHUB_BRANCH = 'main';
-            const GALLERY_PATH = 'art'; // folder in the repo
+            const GALLERY_PATH = 'art';
 
             function prettifyFilename(name) {
                 return name
@@ -367,45 +367,6 @@
                 gallery.innerHTML = '';
                 emptyMsg.style.display = 'none';
 
-                // Try a static manifest first (faster, no API rate limits)
-                try {
-                    const mres = await fetch('/art/manifest.json', { cache: 'no-cache' });
-                    if (mres.ok) {
-                        const list = await mres.json();
-                        if (Array.isArray(list) && list.length) {
-                            list.slice().sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                                .forEach((name, idx) => {
-                                    const title = prettifyFilename(name);
-                                    const item = document.createElement('div');
-                                    item.className = 'gallery-item';
-                                    item.style.animationDelay = `${(idx % 9) * 0.08 + 0.08}s`;
-
-                                    const img = document.createElement('img');
-                                    img.src = '/art/' + encodeURIComponent(name);
-                                    img.alt = title;
-                                    img.loading = 'lazy';
-
-                                    const overlay = document.createElement('div');
-                                    overlay.className = 'gallery-item-overlay';
-                                    const t = document.createElement('div');
-                                    t.className = 'gallery-item-title';
-                                    t.textContent = title;
-                                    overlay.appendChild(t);
-
-                                    item.appendChild(img);
-                                    item.appendChild(overlay);
-
-                                    item.addEventListener('click', () => window.open('/art/' + encodeURIComponent(name), '_blank'));
-                                    gallery.appendChild(item);
-                                });
-                            return; // done
-                        }
-                    }
-                } catch (err) {
-                    console.info('Manifest not available — falling back to GitHub API');
-                }
-
-                // Fallback to GitHub API listing (keeps backward compatibility)
                 const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GALLERY_PATH}?ref=${GITHUB_BRANCH}`;
                 try {
                     const res = await fetch(apiUrl);
@@ -442,20 +403,17 @@
                         item.appendChild(img);
                         item.appendChild(overlay);
 
-                        // open full image in new tab on click
                         item.addEventListener('click', () => window.open(file.download_url, '_blank'));
 
                         gallery.appendChild(item);
                     });
                 } catch (err) {
                     console.error('Gallery load error:', err);
-                    const emptyMsg = document.getElementById('gallery-empty');
                     emptyMsg.style.display = 'block';
-                    emptyMsg.textContent = 'Could not load gallery (check repository visibility or network).';
+                    emptyMsg.textContent = 'Could not load gallery.';
                 }
             }
 
-            // Load on DOM ready
             document.addEventListener('DOMContentLoaded', loadGallery);
         })();
     </script>
