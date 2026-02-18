@@ -148,64 +148,6 @@
             transition: transform 0.5s ease;
         }
 
-        /* Lightbox modal styles */
-        .lightbox {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.75);
-            z-index: 2000;
-            padding: 2rem;
-        }
-
-        .lightbox.open {
-            display: flex;
-        }
-
-        .lightbox-content {
-            max-width: 1200px;
-            max-height: 90vh;
-            width: 100%;
-            background: transparent;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lightbox-img {
-            max-width: 100%;
-            max-height: 90vh;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            border-radius: 4px;
-        }
-
-        .lightbox-close,
-        .lightbox-prev,
-        .lightbox-next {
-            position: absolute;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            padding: 0.5rem 0.75rem;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 1rem;
-            color: #111;
-        }
-
-        .lightbox-close { top: 10px; right: 10px; }
-        .lightbox-prev { left: 10px; top: 50%; transform: translateY(-50%); }
-        .lightbox-next { right: 10px; top: 50%; transform: translateY(-50%); }
-
-        .lightbox-caption {
-            margin-top: 0.75rem;
-            color: #fff;
-            text-align: center;
-            font-size: 1rem;
-        }
-
         .gallery-item:hover img {
             transform: scale(1.05);
         }
@@ -440,13 +382,8 @@
                         return;
                     }
 
-                    // Keep a simple in-memory list for lightbox navigation
-                    const galleryImages = [];
-
                     images.forEach((file, idx) => {
                         const title = prettifyFilename(file.name);
-                        galleryImages.push({ url: file.download_url, title });
-
                         const item = document.createElement('div');
                         item.className = 'gallery-item';
                         item.style.animationDelay = `${(idx % 9) * 0.08 + 0.08}s`;
@@ -466,112 +403,10 @@
                         item.appendChild(img);
                         item.appendChild(overlay);
 
-                        item.addEventListener('click', () => openLightbox(idx));
+                        item.addEventListener('click', () => window.open(file.download_url, '_blank'));
 
                         gallery.appendChild(item);
                     });
-
-                    // Lightbox DOM and behavior
-                    const existingLightbox = document.querySelector('.lightbox');
-                    if (!existingLightbox) {
-                        const lb = document.createElement('div');
-                        lb.className = 'lightbox';
-                        lb.innerHTML = `
-                            <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Image viewer">
-                                <button class="lightbox-close" aria-label="Close">✕</button>
-                                <button class="lightbox-prev" aria-label="Previous">◀</button>
-                                <img class="lightbox-img" alt="" />
-                                <button class="lightbox-next" aria-label="Next">▶</button>
-                                <div class="lightbox-caption" aria-live="polite"></div>
-                            </div>
-                        `;
-                        document.body.appendChild(lb);
-
-                        const lightbox = lb;
-                        const lbImg = lightbox.querySelector('.lightbox-img');
-                        const lbCaption = lightbox.querySelector('.lightbox-caption');
-                        const btnClose = lightbox.querySelector('.lightbox-close');
-                        const btnNext = lightbox.querySelector('.lightbox-next');
-                        const btnPrev = lightbox.querySelector('.lightbox-prev');
-
-                        let currentIndex = 0;
-
-                        function preload(index) {
-                            const len = galleryImages.length;
-                            const next = galleryImages[(index + 1 + len) % len];
-                            const prev = galleryImages[(index - 1 + len) % len];
-                            if (next && next.url) { const i = new Image(); i.src = next.url; }
-                            if (prev && prev.url) { const j = new Image(); j.src = prev.url; }
-                        }
-
-                        function showImage(index) {
-                            currentIndex = (index + galleryImages.length) % galleryImages.length;
-                            const it = galleryImages[currentIndex];
-                            lbImg.src = it.url;
-                            lbImg.alt = it.title || '';
-                            lbCaption.textContent = it.title || '';
-                            preload(currentIndex);
-                        }
-
-                        function openLightbox(index) {
-                            showImage(index);
-                            lightbox.classList.add('open');
-                            document.body.style.overflow = 'hidden';
-                            // focus the close button for accessibility
-                            btnClose.focus();
-                        }
-
-                        function closeLightbox() {
-                            lightbox.classList.remove('open');
-                            document.body.style.overflow = '';
-                        }
-
-                        function nextImage() { showImage(currentIndex + 1); }
-                        function prevImage() { showImage(currentIndex - 1); }
-
-                        // Expose openLightbox for item click handlers
-                        window.openLightbox = openLightbox;
-
-                        // Event listeners
-                        btnClose.addEventListener('click', closeLightbox);
-                        btnNext.addEventListener('click', nextImage);
-                        btnPrev.addEventListener('click', prevImage);
-
-                        // Click on image advances to next
-                        lbImg.addEventListener('click', nextImage);
-
-                        // Simple swipe handling for touch devices
-                        let touchStartX = 0;
-                        lbImg.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
-                        lbImg.addEventListener('touchend', (e) => {
-                            const dx = e.changedTouches[0].clientX - touchStartX;
-                            if (Math.abs(dx) > 40) {
-                                if (dx < 0) nextImage(); else prevImage();
-                            }
-                        });
-
-                        lightbox.addEventListener('click', (e) => {
-                            if (e.target === lightbox) closeLightbox();
-                        });
-
-                        // Keyboard navigation + focus trap
-                        const focusables = [btnClose, btnPrev, btnNext];
-                        document.addEventListener('keydown', (e) => {
-                            if (!lightbox.classList.contains('open')) return;
-                            if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
-                            if (e.key === 'ArrowRight') { e.preventDefault(); nextImage(); }
-                            if (e.key === 'ArrowLeft') { e.preventDefault(); prevImage(); }
-
-                            if (e.key === 'Tab') {
-                                const idx = focusables.indexOf(document.activeElement);
-                                if (e.shiftKey) {
-                                    if (idx <= 0) { focusables[focusables.length - 1].focus(); e.preventDefault(); }
-                                } else {
-                                    if (idx === -1 || idx === focusables.length - 1) { focusables[0].focus(); e.preventDefault(); }
-                                }
-                            }
-                        });
-                    }
                 } catch (err) {
                     console.error('Gallery load error:', err);
                     emptyMsg.style.display = 'block';
