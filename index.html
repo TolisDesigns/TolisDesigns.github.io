@@ -271,6 +271,75 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Lightbox styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: default;
+        }
+
+        .lightbox.show {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 92%;
+            max-height: 92%;
+            object-fit: contain;
+        }
+
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.2s ease;
+            line-height: 1;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+
+        @media (max-width: 768px) {
+            .close {
+                font-size: 1.5rem;
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -310,6 +379,13 @@
         </section>
     </main>
 
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-labelledby="lightbox-title" aria-hidden="true">
+        <button class="close" aria-label="Close lightbox">&times;</button>
+        <img id="lightbox-img" src="" alt="">
+        <div id="lightbox-title" class="sr-only">Image Lightbox</div>
+    </div>
+
     <script>
         // Obfuscated email - decoded on page load to prevent bot harvesting
         (function() {
@@ -344,6 +420,40 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
+
+        // Lightbox functionality
+        (function() {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const closeBtn = document.querySelector('.close');
+
+            window.openLightbox = function(src, alt) {
+                img.src = src;
+                img.alt = alt;
+                lightbox.style.width = window.innerWidth + 'px';
+                lightbox.style.height = window.innerHeight + 'px';
+                lightbox.classList.add('show');
+                lightbox.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('show');
+                lightbox.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            };
+
+            closeBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeLightbox();
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('show')) return;
+                if (e.key === 'Escape') closeLightbox();
+            });
+        })();
 
         // --- Gallery loader: auto-inject images placed in /art (PNG/JPG) via GitHub API ---
         (function() {
@@ -392,6 +502,7 @@
                         img.src = file.download_url;
                         img.alt = title;
                         img.loading = 'lazy';
+                        img.dataset.src = file.download_url;
 
                         const overlay = document.createElement('div');
                         overlay.className = 'gallery-item-overlay';
@@ -403,7 +514,7 @@
                         item.appendChild(img);
                         item.appendChild(overlay);
 
-                        item.addEventListener('click', () => window.open(file.download_url, '_blank'));
+                        item.addEventListener('click', () => openLightbox(file.download_url, title));
 
                         gallery.appendChild(item);
                     });
