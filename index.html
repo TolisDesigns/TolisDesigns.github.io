@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio - Illustrations</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" as="style">
     <style>
         * {
             margin: 0;
@@ -120,8 +121,9 @@
             cursor: pointer;
             opacity: 0;
             transform: translateY(30px);
-            animation: fadeInUp 0.6s ease-out forwards;
+            animation: fadeInUp 0.3s ease-out forwards;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            will-change: transform, opacity;
         }
 
         .gallery-item:nth-child(1) { animation-delay: 0.1s; }
@@ -492,11 +494,12 @@
                         return;
                     }
 
+                    const fragment = document.createDocumentFragment();
                     images.forEach((file, idx) => {
                         const title = prettifyFilename(file.name);
                         const item = document.createElement('div');
                         item.className = 'gallery-item';
-                        item.style.animationDelay = `${(idx % 9) * 0.08 + 0.08}s`;
+                        item.style.animationDelay = `${(idx % 9) * 0.05 + 0.05}s`;
 
                         const img = document.createElement('img');
                         img.src = file.download_url;
@@ -514,9 +517,19 @@
                         item.appendChild(img);
                         item.appendChild(overlay);
 
-                        item.addEventListener('click', () => openLightbox(file.download_url, title));
+                        fragment.appendChild(item);
+                    });
 
-                        gallery.appendChild(item);
+                    requestAnimationFrame(() => {
+                        gallery.appendChild(fragment);
+                        // Event delegation for gallery clicks
+                        gallery.addEventListener('click', (e) => {
+                            const item = e.target.closest('.gallery-item');
+                            if (item) {
+                                const img = item.querySelector('img');
+                                openLightbox(img.dataset.src, img.alt);
+                            }
+                        });
                     });
                 } catch (err) {
                     console.error('Gallery load error:', err);
